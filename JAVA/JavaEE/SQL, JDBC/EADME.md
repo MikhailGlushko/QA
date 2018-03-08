@@ -190,11 +190,10 @@ Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 >      url="jdbc:mysql://localhost:3306/DataBaseName"
 >      username="root"
 >      password="admin"
->        
 >      maxActive="100"
 >      maxIdle="20"
 >      minIdle="5"
->     maxWait="10000"/>
+>      maxWait="10000"/>
 >
 >ontext.xml:
 >
