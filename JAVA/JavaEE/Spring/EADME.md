@@ -171,3 +171,120 @@
 > - Определить messageSource в конфигурации Spring используя классы ResourceBundleMessageSource или ReloadableResourceBundleMessageSource.
 > - Определить localeResolver класса CookieLocaleResolver для включения возможности переключения локали.
 > - С помощью элемента spring:message DispatcherServlet будет определять в каком месте необходимо подставлять локализированное сообщение в ответе.
+
+## 31. Как мы можем использовать Spring для создания веб-службы RESTful, возвращающей JSON?
+>Spring Framework позволяет создавать Restful веб сервисы и возвращать данные в формате JSON. Spring обеспечивает интеграцию с Jackson JSON API для возможности отправки JSON ответов в restful web сервисе. Для отправки ответа в формате JSON из Spring MVC приложения необходимо произвести следующие настройки:
+> - Добавить зависимости Jackson JSON. С помощью maven это делается так:
+>><!-- Jackson -->
+>><dependency>
+>>    <groupId>com.fasterxml.jackson.core</groupId>
+>>    <artifactId>jackson-databind</artifactId>
+>>    <version>${jackson.databind-version}</version>
+>></dependency>
+> - Настроить бин RequestMappingHandlerAdapter в файле конфигурации Spring и задать свойство messageConverters на использование бина MappingJackson2HttpMessageConverter
+>><!-- Configure to plugin JSON as request and response in method handler -->
+>><beans:bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+>>    <beans:property name="messageConverters">
+>>        <beans:list>
+>>            <beans:ref bean="jsonMessageConverter"/>
+>>        </beans:list>
+>>    </beans:property>
+>></beans:bean>
+>>  
+>><!-- Configure bean to convert JSON to POJO and vice versa -->
+>><beans:bean id="jsonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+>></beans:bean>
+> - В контроллере указать с помощью аннотации @ResponseBody возвращение Object:
+>>@RequestMapping(value = EmpRestURIConstants.GET_EMP, method = RequestMethod.GET)
+>>public @ResponseBody Employee getEmployee(@PathVariable("id") int empId) {
+>>    logger.info("Start getEmployee. ID="+empId);
+>>      
+>>    return empData.get(empId);
+>>}
+
+## 32. Приведите пример часто используемых аннотаций Spring.
+> - **@Controller** – класс фронт контроллера в проекте Spring MVC.
+> - **@RequestMapping** – позволяет задать шаблон маппинга URI в методе обработчике контроллера.
+> - **@ResponseBody** – позволяет отправлять Object в ответе. Обычно используется для отправки данных формата XML или JSON.
+> - **@PathVariable** – задает динамический маппинг значений из URI внутри аргументов метода обработчика.
+> - **@Autowired** – используется для автоматического связывания зависимостей в spring beans.
+> - **@Qualifier** – используется совместно с @Autowired для уточнения данных связывания, когда возможны коллизии (например одинаковых имен\типов).
+> - **@Service** – указывает что класс осуществляет сервисные функции.
+> - **@Scope** – указывает scope у spring bean.
+> - **@Configuration, @ComponentScan и @Bean** – для java based configurations.
+> - AspectJ аннотации для настройки aspects и advices, **@Aspect, @Before, @After,@Around, @Pointcut и др.**
+
+## 33.  Можем ли мы послать объект как ответ метода обработчика контроллера?
+>Да, это возможно. Для этого используется аннотация @ResponseBody. Так можно отправлять ответы в виде JSON, XML в restful веб сервисах.
+
+## 34. Как загрузить файл в Spring MVC?
+>Внутри спринг предусмотрен интерфейс MultipartResolver для обеспечения загрузки файлов. Фактически нужно настроить файл конфигурации для указания обработчика загрузки файлов, а затем задать необходимый метод в контроллере spring.
+
+## 35. Как проверить (валидировать) данные формы в Spring Web MVC Framework?
+>Spring поддерживает аннотации валидации из JSR-303, а так же возможность создания своих реализаций классов валидаторов. 
+
+## 36. Что вы знаете о Spring MVC Interceptor и как он используется?
+>Перехватчики в Spring (Spring Interceptor) являются аналогом Servlet Filter и позволяют перехватывать запросы клиента и обрабатывать их. Перехватить запрос клиента можно в трех местах: preHandle, postHandle и afterCompletion.
+> - *preHandle* — метод используется для обработки запросов, которые еще не были переданы в метода обработчик контроллера. Должен вернуть true для передачи следующему перехватчику или в handler method. False укажет на обработку запроса самим обработчиком и отсутствию необходимости передавать его дальше. Метод имеет возможность выкидывать исключения и пересылать ошибки к представлению.
+> - *postHandle* — вызывается после handler method, но до обработки DispatcherServlet для передачи представлению. Может использоваться для добавления параметров в объект ModelAndView.
+afterCompletion — вызывается после отрисовки представления.
+>
+>Для создания обработчика необходимо расширить абстрактный класс HandlerInterceptorAdapter или реализовать интерфейс HandlerInterceptor. Так же нужно указать перехватчики в конфигурационном файле Spring.
+
+## 37. Spring JdbcTemplate класс и его применение.
+>Spring предоставляет отличную поддержку JDBC API и предлагает класс утилиту JdbcTemplate, с помощью которого можно избавиться от многократного повторения похожего кода в приложении (вроде операций open \ closing connection; ResultSet, PreparedStatement и др.). Для подключения необходимо настроить файл конфигурации spring и получить объект JdbcTemplate.
+
+## 38. Как использовать Tomcat JNDI DataSource в веб-приложении Spring?
+>Для использования контейнера сервлетов настроенного на использование JNDI DataSource, необходимо задать соответствующее свойство в файле конфигурации и затем внедрять его как зависимость. Далее мы можем использовать объект JdbcTemplate для выполнения операций с базами данных.
+>
+>><beans:bean id="dbDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+>>    <beans:property name="jndiName" value="java:comp/env/jdbc/MyLocalDB"/>
+>></beans:bean>
+
+## 39. Каким образом можно управлять транзакциями в Spring?
+>Транзакциями в Spring управляют с помощью Declarative Transaction Management (программное управление). Используется аннотация @Transactional для описания необходимости управления транзакцией. В файле конфигурации нужно добавить настройку transactionManager для DataSource.
+>
+>><bean id="transactionManager"
+>>    class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+>>    <property name="dataSource" ref="dataSource" />
+>></bean>
+
+## 40. Расскажите о Spring DAO.
+>Spring DAO предоставляет возможность работы с доступом к данным с помощью технологий вроде JDBC, Hibernate в удобном виде. Существуют специальные классы: JdbcDaoSupport, HibernateDaoSupport, JdoDaoSupport, JpaDaoSupport.
+>
+>В Spring DAO поддерживается иерархия исключений, что помогает не обрабатывать некоторые исключения.
+
+## 41. Как интегрировать Spring и Hibernate?
+>Для интеграции Hibernate в Spring необходимо подключить зависимости, а так же настроить файл конфигурации Spring. Т.к. настройки несколько отличаются между проектами и версиями, то смотрите официальную документацию Spring и Hibernate для уточнения настроек для конкретных технологий.
+>
+>Читайте (spring 4, hibernate 5) —  Spring Data JPA — пример приложения Hello World. Настройки Spring Data + JPA + Hibernate + MySQL.
+
+## 42. Расскажите о Spring Security.
+>Проект Spring Security предоставляет широкие возможности для защиты приложения. Кроме стандартных настроек для аутентификации, авторизации и распределения ролей и маппинга доступных страниц, ссылок и т.п., предоставляет защиту от различных вариантов атак (например CSRF). Имеет множество различных настроек, но остается легким в использовании.
+
+## 43. Как внедрить java.util.Properties в Spring Bean?
+>Для возможности использования Spring EL для внедрения свойств (properties) в различные бины необходимо определить propertyConfigure bean, который будет загружать файл свойств Или через аннотации
+
+## 44. Назовите некоторые из шаблонов проектирования, используемых в Spring Framework?
+>Spring Framework использует множество шаблонов проектирования, например:
+> 1.  Singleton Pattern: Creating beans with default scope.
+> 2.  Factory Pattern: Bean Factory classes
+> 3.  Prototype Pattern: Bean scopes
+> 4.  Adapter Pattern: Spring Web and Spring MVC
+> 5.  Proxy Pattern: Spring Aspect Oriented Programming support
+> 6.  Template Method Pattern: JdbcTemplate, HibernateTemplate etc
+> 7.  Front Controller: Spring MVC DispatcherServlet
+> 8.  Data Access Object: Spring DAO support
+> 9.  Dependency Injection and Aspect Oriented Programming
+
+## 45.Best Practices в Spring Framework.
+> 1.  Избегайте указания версий в пространстве имен, чтобы быть уверенным в использовании последних версий.
+> 2.  Разделяйте конфигурации спринг согласно их деятельности, например: spring-jdbc.xml, spring-security.xml.
+> 3.  Spring бины, которые будут использованы в различных контекстах, необходимо указывать в root context и инициализировать с помощью listener.
+> 4.  Настраивайте зависимости бинов где это возможно и избегайте автоматического связывание там, где в этом нет строгой надобности.
+> 5.  Создавайте файл свойств и считывайте его в файле конфигурации Spring для использования application level properties.
+> 6.  Для больших приложений предпочтительнее использовать настройки с помощью xml файлов конфигурации, а не аннотаций.
+> 7.  Используйте подходящие по смыслу аннотации при указании бина, например: @Service для классов бизнес логики и @Repository для классов для работы с данными.
+> 8.  Spring framework имеет в проекте множество модулей. Удалите все лишние зависимости, которые могут быть загружены автоматически при указании корневой библиотеки.
+> 9.  Если вы используете аспекты, убедитесь, что используете точку присоединения как можно более близко, чтобы избежать случайных проблем с обработкой лишних методов. Пользовательские аннотации могут принести существенные преимущества при использовании AOP.
+Используйте dependency injection там, где это принесет явную пользу. Внедрение зависимостей повсюду может добавить сложностей при поддержке проекта.
